@@ -1,0 +1,49 @@
+# Basic
+title: Ford
+subtitle: 天籁之音，人生几得。
+welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank">Download the theme</a>
+description: 嗨！我叫肖帆（@Ford），一名普通的iOS开发者。生活在碧海蓝天下的深圳。以技术和音乐为乐，乐于分享所见所得，请多多指教。
+creator: <a href="http://smallfan.net">@Ford</a>
+
+url: "http://ford.smallfan.net"
+
+permalink: /:year/:month/:title/
+
+# Format
+highlighter: plain
+
+# supported colors: blue, green, purple, red, orange or slate. If you need clear, leave it empty.
+#cover_color: red
+
+# The blog button should not be removed.
+blog_button:
+    title: 博客
+    description: Visit blog
+
+# Navigation buttons in the front page.
+nav:
+    - {title: 关于, description: About me, url: 'http://ford.onevcat.com/about'}
+    # - {title: Another Button, description: A button, url: 'http://example.com'}
+
+# Pagination
+gems: [jekyll-paginate]
+paginate: 10
+paginate_path: "page/:num/"
+
+# Comment
+comment:
+    #disqus: vno-jekyll
+    duoshuo: smallfan
+    
+# Social
+social:
+    weibo: CoderSmallfan
+    github: CoderSmallfan
+    #twitter: CoderSmallfan
+    #gplus: 107108267983477358170
+    mail: CoderSmallfan@qq.com
+
+# Google Analytics
+ga:
+    # id: your_ga_id
+    # host: your_host
