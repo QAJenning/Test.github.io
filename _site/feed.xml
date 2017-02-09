@@ -1,0 +1,1086 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ford</title>
+    <description>嗨！我叫肖帆（@Ford），一名普通的iOS开发者。生活在碧海蓝天下的深圳。以技术和音乐为乐，乐于分享所见所得，请多多指教。</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 09 Feb 2017 23:01:57 +0800</pubDate>
+    <lastBuildDate>Thu, 09 Feb 2017 23:01:57 +0800</lastBuildDate>
+    <generator>Jekyll v3.4.0</generator>
+    
+      <item>
+        <title>浮点数存储原理</title>
+        <description>&lt;h2 id=&quot;浮点数存储方式&quot;&gt;浮点数存储方式&lt;/h2&gt;
+
+&lt;p&gt;在以0和1为基础的计算机中，浮点数同样采用二进制的形式存储。一般情况下，32位计算机中&lt;code&gt;float&lt;/code&gt;占用32位，&lt;code&gt;double&lt;/code&gt;占用64位。&lt;/p&gt;
+
+&lt;p&gt;无论是&lt;code&gt;float&lt;/code&gt;还是&lt;code&gt;double&lt;/code&gt;在存储中都分为三个部分：
+&lt;strong&gt;符号位(Sign) :&lt;/strong&gt; 0代表正，1代表为负。
+&lt;strong&gt;指数位（Exponent）:&lt;/strong&gt;用于存储科学计数法中的指数数据，并且采用移位存储。
+&lt;strong&gt;尾数部分（Mantissa）：&lt;/strong&gt;尾数部分。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&quot;ieee754标准规范&quot;&gt;IEEE754标准规范&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;IEEE754规范&lt;/strong&gt; 明确了浮点数在计算机中的存储方式，其中&lt;strong&gt;R32.24&lt;/strong&gt;和&lt;strong&gt;R64.53&lt;/strong&gt;分别针对&lt;code&gt;float&lt;/code&gt;及&lt;code&gt;double&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;R32.24：&lt;/strong&gt;即32位内存中，从右到左，第0-22位为&lt;code&gt;尾数部分&lt;/code&gt;，第23-30位为&lt;code&gt;指数位&lt;/code&gt;，第31位为&lt;code&gt;符号位&lt;/code&gt;。
+&lt;strong&gt;R64.53：&lt;/strong&gt;即64位内存中，从右到左，第0-51位为&lt;code&gt;尾数部分&lt;/code&gt;，第52-62位为&lt;code&gt;指数位&lt;/code&gt;，第63位为&lt;code&gt;符号位&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;这里&lt;strong&gt;R32.24&lt;/strong&gt;及&lt;strong&gt;R64.53&lt;/strong&gt;为什么分别是24和53，下面会作解释。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;R32.24&lt;/strong&gt;和&lt;strong&gt;R64.53&lt;/strong&gt;的存储方式都是用科学计数法来存储数据的，比如10.25用二进制表示为1010.01，科学计数法表示为1.01001x2^3。任何非0浮点数都可以表示为1.XXXXx2^n，1.XXXX即为&lt;code&gt;尾数部分&lt;/code&gt;。因为第一位总会是1，为节省空间计算机不将其存储，在做浮点数运算时再由寄存器将其插入，所以实际存储在尾数部分的为XXXX（小数）部分。而指数部分的n，同样采用二进制形式，存储在&lt;code&gt;指数位&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;因为&lt;strong&gt;R32.24&lt;/strong&gt;中尾数部分存储在第0-22位，那么实际上存储的尾数为23。但因为尾数部分第一个数字1被省略，所以实际存储尾数位数为24位，这就是&lt;strong&gt;R32.24&lt;/strong&gt;中24的由来。同理，&lt;strong&gt;R64.53&lt;/strong&gt;实际上存储尾数位数为53位。&lt;/p&gt;
+
+&lt;h2 id=&quot;特殊的指数位阶码&quot;&gt;特殊的指数位(阶码)&lt;/h2&gt;
+
+&lt;p&gt;无论&lt;strong&gt;R32.24&lt;/strong&gt;还是&lt;strong&gt;R64.53&lt;/strong&gt;，实际上采用的是分段存储机制。每段对应采用二进制形式。&lt;/p&gt;
+
+&lt;p&gt;但在&lt;code&gt;指数位&lt;/code&gt;中，存储的策略不同于&lt;code&gt;符号位&lt;/code&gt;及&lt;code&gt;尾数部分&lt;/code&gt;。因为指数为&lt;code&gt;无符号整数&lt;/code&gt;，但在实际的科学计数法中指数可正可负，故采用&lt;strong&gt;移码&lt;/strong&gt;方法表示，对两个指数大小的比较和对阶操作都比较方便，因为阶码域值大者其指数值也大。将浮点数的指数真值 e 变成阶码 Ｅ 时，应将指数 e 加上一个固定的偏移值127(01111111)，即 Ｅ＝e＋127。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;关于移码：详见 &lt;a href=&quot;https://zh.wikipedia.org/wiki/移码&quot;&gt;https://zh.wikipedia.org/wiki/移码&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;在Wikipedia中介绍：标准&lt;strong&gt;移码&lt;/strong&gt;的偏移值为128。而在k位内存存储中浮点数指数位中采用偏移值为(2^(k-1))-1（如&lt;strong&gt;R32.24&lt;/strong&gt;中为2^7-1），即为非标准移码。&lt;/p&gt;
+
+&lt;p&gt;在IEEE标准中，指数E还可以再分成三种情况：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;E不全为0或不全为1。这时，浮点数就采用上面的规则表示，即指数E的计算值减去127（或1023），得到真实值，再将有效数字M前加上第一位的1。&lt;/li&gt;
+  &lt;li&gt;E全为0。这时，浮点数的指数E等于1-127（或者1-1023），有效数字M不再加上第一位的1，而是还原为0.xxxxxx的小数。这样做是为了表示±0，以及接近于0的很小的数字。&lt;/li&gt;
+  &lt;li&gt;E全为1。这时，如果有效数字M全为0，表示±无穷大（正负取决于符号位s）；如果有效数字M不全为0，表示这个数不是一个数（NaN）。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;以上都是计算机标准约定，
+这样在32位浮点数表示中，要除去E用全0和全1(255)表示零和无穷大的特殊情况，指数的偏移值不选128(10000000)，而选127(01111111)。
+对于规格化浮点数，E的范围变为1到254，真正的指数值e则为-126到+127。因此32位浮点数表示的绝对值的范围是10^-38 ~ 10^38（以10的幂表示）。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/FloatStorageMode/FloatStorageMode01.jpeg&quot; alt=&quot;浮点数存储原理01&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;课后题&quot;&gt;课后题&lt;/h2&gt;
+&lt;p&gt;在&lt;a href=&quot;http://www.ruanyifeng.com/blog/&quot;&gt;ruanyf的博客&lt;/a&gt;中，&lt;a href=&quot;http://www.ruanyifeng.com/blog/2010/06/ieee_floating-point_representation.html&quot;&gt;《浮点数的二进制表示》&lt;/a&gt;这个文章开篇有一道题目，这里摘取出来，作为典型分析放在最后。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-c&quot;&gt;#include &amp;lt;stdio.h&amp;gt;
+void main(void){
+
+　　int num=9;
+　　float* pFloat=&amp;amp;num;
+　　
+　　printf(&quot;num的值为：%d\n&quot;,num);
+　　printf(&quot;*pFloat的值为：%f\n&quot;,*pFloat);
+　　
+　　*pFloat=9.0;
+　　
+　　printf(&quot;num的值为：%d\n&quot;,num);
+　　printf(&quot;*pFloat的值为：%f\n&quot;,*pFloat);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行结果如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;num的值为：9
+*pFloat的值为：0.000000
+num的值为：1091567616
+*pFloat的值为：9.000000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+</description>
+        <pubDate>Tue, 27 Dec 2016 17:39:22 +0800</pubDate>
+        <link>http://localhost:4000/2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</guid>
+        
+        <category>工匠图谱</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>SVN目录非代码文件无感知替换方案</title>
+        <description>&lt;h2 id=&quot;背景&quot;&gt;背景&lt;/h2&gt;
+
+&lt;p&gt;因为一些&lt;strong&gt;不可控因素&lt;/strong&gt;，目前所在的iOS团队依旧使用SVN进行版本管理。&lt;/p&gt;
+
+&lt;p&gt;因为项目比较大，架构组在工程设计上将多个业务拆分成独立的&lt;code&gt;project&lt;/code&gt;,通过一个公用&lt;code&gt;shell&lt;/code&gt;引入各个业务的&lt;code&gt;.a静态库&lt;/code&gt;实现组件化解耦，客观条件上造成&lt;code&gt;branch&lt;/code&gt;的文件非常大，并且因为各业务迭代的进行，静态库经常需要update。&lt;/p&gt;
+
+&lt;p&gt;SVN服务器物理地址是在北京研发中心，而我所在的深圳研发中心因为外网带宽限制的问题，常会导致浪费大量时间在等待update上。&lt;/p&gt;
+
+&lt;p&gt;在此之前对SVN管理方式一无所知，仅知道同等情况下在git上可以通过切换源可以解决问题。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id=&quot;svn结构分析&quot;&gt;SVN结构分析&lt;/h2&gt;
+
+&lt;p&gt;了解到SVN是以在&lt;code&gt;Working Copy根地址&lt;/code&gt;建立&lt;code&gt;.svn&lt;/code&gt;隐藏目录来进行信息管理。所以第一件事情是打开这个目录一探究竟。&lt;/p&gt;
+
+&lt;p&gt;Mac上显示所有隐藏文件的方法:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ defaults write com.apple.finder AppleShowAllFiles -bool true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行该命令后，记得强制重启Finder。&lt;/p&gt;
+
+&lt;p&gt;打开之后.svn之后可以看到如下目录树：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.svn
+├── entries
+├── format
+├── pristine
+├── tmp
+└── wc.db
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里我们只要重点关注&lt;code&gt;pristine&lt;/code&gt;及&lt;code&gt;wc.db&lt;/code&gt;。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;pristine:&lt;/strong&gt;保存当前&lt;code&gt;Working Copy&lt;/code&gt;下所有文件的各版本变更信息。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;wc.db:&lt;/strong&gt;存储当前&lt;code&gt;Working Copy&lt;/code&gt;下&lt;strong&gt;当前&lt;/strong&gt;所有文件状态的数据库。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;也就是说，我们只需要在pristine及wc.db对我们需要手动替换的文件&lt;strong&gt;动动手脚&lt;/strong&gt;就行了。&lt;/p&gt;
+
+&lt;h2 id=&quot;基本思路&quot;&gt;基本思路&lt;/h2&gt;
+&lt;p&gt;我们假设北京的服务器为A，我自己的Mac设备为C。&lt;/p&gt;
+
+&lt;p&gt;那么当我从A直接update code到C时因为外网带宽限制问题导致时间过长时，首要的是解决带宽的问题。&lt;/p&gt;
+
+&lt;p&gt;通过努力，我向公司申请到了一台作为iOS持续集成的Mac Mini（后面我们称之为B）的权限，因为该设备同处深圳内网，没有带宽限制，那一切就好办了。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;基本想法是：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;服务器B不间断执行&lt;code&gt;update&lt;/code&gt;从服务器A更新保证代码最新（低速）&lt;/li&gt;
+  &lt;li&gt;设备C需要update library时仅从服务器B&lt;code&gt;replace&lt;/code&gt;（高速）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;执行方法&quot;&gt;执行方法&lt;/h2&gt;
+&lt;h3 id=&quot;1架设中转服务器&quot;&gt;1.架设中转服务器&lt;/h3&gt;
+
+&lt;p&gt;首先ssh到服务器B，然后执行&lt;code&gt;svn checkout&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;而后编写一个自动定期执行svn update的脚本。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;关于Mac定时自动执行脚本的方法，在鹅厂实习时候经常用到的有两种：
+1.crontab
+2.launchctl&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;但B设备是一台服务器，脚本一旦执行一般情况下无需去停止它。那么直接使用死循环配合&lt;code&gt;sleep&lt;/code&gt;可以免去一堆配置的需要。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;for (( i = 0;; i++ )); do
+		
+		#需要更新
+		echo &quot;正在获取更新,请勿中途停止 &quot; $(date '+%Y-%m-%d %H:%M:%S');
+		svn update
+		wait
+		echo &quot;更新完成&quot; $(date '+%Y-%m-%d %H:%M:%S');
+		echo &quot;亲,让服务器休息一小会儿(1分钟)&quot;
+		sleep 30;
+
+done
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;同时，我们需要开启服务器B的FTP功能，Mac上只需要在&lt;code&gt;共享设置&lt;/code&gt;上勾选&lt;code&gt;文件共享&lt;/code&gt;即可。&lt;/p&gt;
+&lt;h3 id=&quot;2执行拷贝替换本地静态库&quot;&gt;2.执行拷贝替换本地静态库&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;localUrl='/Users/Smallfan/Desktop/trunk'
+
+remoteHost='服务器IP'
+remoteName='用户名'
+remotePasswd='密码'
+remotePath='Working Copy目录地址'
+
+cd $localUrl
+#从云服务器拷贝替换本地Library
+scp -r &quot;$remoteName@$remoteHost:$remotePath/Library&quot; $localUrl
+# wget -P . -m -nH ftp://$remoteHost:21/$remotePath/Library --ftp-user=$remoteName --ftp-password=$remotePasswd;
+wait
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;wget支持断点续传，理论上功能更强。&lt;br /&gt;
+使用需要先安装wget，推荐安装方法：brew&lt;/p&gt;
+
+&lt;p&gt;brew安装方法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ /usr/bin/ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;wget brew安装方法：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ brew install wget --with-libressl
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;ok，这样我们就完成了指定文件的替换，大功告成！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;但是如果此时执行&lt;code&gt;svn update&lt;/code&gt;，一定会发生&lt;strong&gt;冲突&lt;/strong&gt;。&lt;br /&gt;
+原因在于：替换的文件&lt;code&gt;MD5&lt;/code&gt;变了，但SVN本地数据库暂未更新。&lt;/p&gt;
+
+&lt;h3 id=&quot;3修改wcdb对应数据&quot;&gt;3.修改wc.db对应数据&lt;/h3&gt;
+
+&lt;p&gt;这个时候应该看看wc.db了。&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Mac下打开db文件推荐使用SQLite Professional&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/svnreplace/Table.png?imageView/2/w/400/h/400/q/100&quot; alt=&quot;wc.db表结构&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;遍历了所有的表，基本锁定NODES和PRISTINE这两个表需要修改。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;NODES:&lt;/strong&gt;所有文件的最新版本记录&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;PRISTINE:&lt;/strong&gt;文件对应的MD5记录&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/svnreplace/Nodes.png?imageView/2/w/800/h/800/q/100&quot; alt=&quot;NODES表结构&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/svnreplace/Pristine.png?imageView/2/w/800/h/800/q/100&quot; alt=&quot;PRISTINE表结构&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;通过对比发现：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;NODES表中的local_relpath为本地文件的相对路径&lt;/li&gt;
+  &lt;li&gt;NODES表中的checksum为文件的sha1值&lt;/li&gt;
+  &lt;li&gt;PRISTINE表中的md5_checksum为文件的MD5值&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;那么实际上需要做的有几件事：&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;将&lt;code&gt;NODES&lt;/code&gt;表中替换的文件行数据全部取出（我替换的是Library目录）&lt;/li&gt;
+  &lt;li&gt;将&lt;code&gt;NODES&lt;/code&gt;表取出的数据中&lt;code&gt;checksum&lt;/code&gt;对应于&lt;code&gt;PRISTINE&lt;/code&gt;表&lt;code&gt;checksum&lt;/code&gt;的数据取出并删除&lt;/li&gt;
+  &lt;li&gt;将&lt;code&gt;NODES&lt;/code&gt;表中替换的文件行数据全部删除&lt;/li&gt;
+  &lt;li&gt;替换从服务器B中下载的wc.db中的&lt;code&gt;NODES&lt;/code&gt;对应行数据&lt;/li&gt;
+  &lt;li&gt;替换从服务器B中下载的wc.db中的&lt;code&gt;PRISTINE&lt;/code&gt;对应行数据&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;我们暂时将本地的wc.db称为&lt;strong&gt;B.db&lt;/strong&gt;，将服务器B的wc.db称之为&lt;strong&gt;A.db&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;#创建临时文件夹
+mkdir temp
+chmod -R 777 temp
+cd temp
+
+#下载云svn数据库,重命名为A.db
+ftp -v -n &amp;lt;&amp;lt; EOF
+	open $remoteHost
+	user $remoteName $remotePasswd
+	cd $remotePath/.svn
+	bin
+	get wc.db
+	prompt off
+	bye
+EOF
+wait
+
+cp wc.db A.db
+wait
+
+#创建本地svn数据库副本,重命名为B.db
+cp $localUrl/.svn/wc.db $localUrl/temp
+wait
+mv wc.db B.db
+wait
+
+
+#开始执行替换
+#从B.NODES表中查local_relpath字段中包含&quot;Library/&quot;的行,将结果存入B.TEMP_NODES表,同时删除原来的数据
+sqlite3 B.db &quot;create table TEMP_NODES as select * from NODES where local_relpath like 'Library/%';&quot;
+sqlite3 B.db &quot;delete from NODES where local_relpath like 'Library/%';&quot;
+
+#将B.PRISTINE中checksum字段存在于B.TEMP_NODES中checksum字段的行中的md5_checksum存入B.PREDEL_PRISTINE
+sqlite3 B.db &amp;lt;&amp;lt; EOF
+create table PREDEL_PRISTINE as select md5_checksum from PRISTINE where checksum in (select checksum from TEMP_NODES);
+.exit
+EOF
+
+#删除B.PREDEL_PRISTINE表
+sqlite3 B.db &quot;drop table PREDEL_PRISTINE;&quot;
+
+#将B.PRISTINE中checksum字段存在于B.TEMP_NODES中checksum字段的行删除,然后删除B.TEMP_NODES表
+sqlite3 B.db &quot;delete from PRISTINE where checksum in (select checksum from TEMP_NODES);&quot;
+sqlite3 B.db &quot;drop table TEMP_NODES;&quot;
+
+#从A.NODES查local_relpath字段中包含&quot;Library/&quot;的行,将结果存入A.TEMP2_NODES,然后跨库复制A.TEMP2_NODES到B.TEMP2_NODES
+sqlite3 A.db &quot;create table TEMP2_NODES as select * from NODES where local_relpath like 'Library/%';&quot;
+
+sqlite3 B.db &amp;lt;&amp;lt; EOF
+attach database 'A.db' as 'A';
+create table TEMP2_NODES as select * from A.TEMP2_NODES;
+.exit
+EOF
+
+#将B.TEMP2_NODES插入到B.NODES
+sqlite3 B.db &quot;insert into NODES(wc_id,local_relpath,op_depth,parent_relpath,repos_id,repos_path,revision,presence,moved_here,moved_to,kind,properties,depth,checksum,symlink_target,changed_revision,changed_date,changed_author,translated_size,last_mod_time,dav_cache,file_external) select wc_id,local_relpath,op_depth,parent_relpath,repos_id,repos_path,revision,presence,moved_here,moved_to,kind,properties,depth,checksum,symlink_target,changed_revision,changed_date,changed_author,translated_size,last_mod_time,dav_cache,file_external from TEMP2_NODES;&quot;
+# sqlite3 B.db &quot;insert into NODES select * from TEMP2_NODES;&quot;
+
+#将B.TEMP2_NODES中checksum所有数据导出到文件BPREMERGELIST.txt
+sqlite3 B.db &quot;select checksum from TEMP2_NODES;&quot; &amp;gt; BPREMERGELIST.txt
+wait
+
+#删除B.TEMP2_NODES表
+sqlite3 B.db &quot;drop table TEMP2_NODES;&quot;
+
+
+
+
+
+
+#将A.PRISTINE中checksum字段存在于A.TEMP2_NODES中checksum字段的行复制到B.TEMP_PRISTINE
+sqlite3 A.db &quot;create table TEMP_PRISTINE as select * from PRISTINE where checksum in (select checksum from TEMP2_NODES);&quot;
+
+sqlite3 B.db &amp;lt;&amp;lt; EOF
+attach database &quot;A.db&quot; as 'A';
+create table TEMP_PRISTINE as select * from A.TEMP_PRISTINE;
+.exit
+EOF
+
+#将B.TEMP_PRISTINE插入B.PRISTINE
+sqlite3 B.db &quot;insert into PRISTINE select * from TEMP_PRISTINE;&quot;
+
+#删除B.TEMP_PRISTINE
+sqlite3 B.db &quot;drop table TEMP_PRISTINE;&quot;
+#结束替换
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;完成数据库更新之后，此时千万别执行svn的任何操作！&lt;/strong&gt;&lt;br /&gt;
+&lt;strong&gt;否则将导致本地svn被破坏！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;因为还差了一步：替换pristine目录下对应文件的修改记录。&lt;/p&gt;
+
+&lt;h3 id=&quot;4修改pristine目录下文件修改记录&quot;&gt;4.修改pristine目录下文件修改记录&lt;/h3&gt;
+
+&lt;p&gt;打开pristine目录会看到有非常多以十六进制命名的子目录&lt;br /&gt;
+稍微观察会发现：这些子目录的标题对应其目录内文件标题的开头，而这些目录内文件都是以&lt;code&gt;.svn-base&lt;/code&gt;扩展类型。&lt;/p&gt;
+
+&lt;p&gt;这些&lt;code&gt;svn-base&lt;/code&gt;文件实质上是每个文件每一次提交的变更记录，当在svn中使用&lt;code&gt;compare&lt;/code&gt;指令时实际上就是使用这些文件，而这些文件的生成时机是每一次文件修改时间被变更时。&lt;/p&gt;
+
+&lt;p&gt;所以理论上我们需要替换这里面对应我们替换的文件的记录，替换的源来自服务器B上&lt;code&gt;.svn&lt;/code&gt;对应&lt;code&gt;pristine&lt;/code&gt;中的记录。&lt;/p&gt;
+
+&lt;h4 id=&quot;那么如何获取需要替换的记录呢&quot;&gt;那么如何获取需要替换的记录呢？&lt;/h4&gt;
+
+&lt;p&gt;回首刚才的shell脚本里会发现：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sqlite3 B.db &quot;select checksum from TEMP2_NODES;&quot; &amp;gt; BPREMERGELIST.txt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;实际上已经将需要替换的数据行重定向到了&lt;code&gt;BPREMERGELIST.txt&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;checksum&lt;/code&gt;实际上就是&lt;code&gt;pristine&lt;/code&gt;中所有&lt;code&gt;.svn-base&lt;/code&gt;命名的组成部分。&lt;/p&gt;
+
+&lt;h4 id=&quot;举个栗子&quot;&gt;举个栗子：&lt;/h4&gt;
+&lt;p&gt;取某一个文件&lt;code&gt;NODES&lt;/code&gt;中&lt;code&gt;checksum&lt;/code&gt;的值如下：
+&lt;code&gt;$sha1$0a3c1f7f173dd30dce3cce3e436fd8d8d2a90167&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;在&lt;code&gt;pristine&lt;/code&gt;中找到&lt;code&gt;0a&lt;/code&gt;的目录，&lt;br /&gt;
+打开后Find&lt;code&gt;pristine&lt;/code&gt;命名为&lt;code&gt;0a3c1f7f173dd30dce3cce3e436fd8d8d2a90167&lt;/code&gt;的文件。&lt;/p&gt;
+
+&lt;p&gt;发现规律了没？&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;实际上我们仅需要找到替换的文件对应&lt;code&gt;NODES&lt;/code&gt;表中的&lt;code&gt;checksum&lt;/code&gt;字段的sha1值，截取并找到&lt;code&gt;pristine&lt;/code&gt;下对应的目录及&lt;code&gt;.svn-base&lt;/code&gt;文件即可&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;#从云服务器找到存在于BREMERGELIST.txt每一行的文件下载至本地.svn/pristine对应路径中
+for line in $(cat BPREMERGELIST.txt); do
+	if [[ $line == \$sha1* ]]; then
+		line=${line##*\$};
+		prefix=${line:0:2};
+
+		result=0;
+		zero=0;
+
+		all=`ls $localUrl/.svn/pristine`;
+		for dir in $all; do
+			if [[ $dir == $prefix ]]; then
+				result=1;
+				break 1;
+			fi
+		done
+
+		if [ &quot;$result&quot; -eq &quot;$zero&quot; ]; then
+			cd pristine;
+			mkdir $dir;
+			chmod -R 777 $dir;
+			wait;
+		fi
+
+		cd $localUrl/.svn/pristine/$dir/
+
+		rm -rf ./$line.svn-base
+   		wget ftp://$remoteHost:21/$remotePath/.svn/pristine/$dir/$line.svn-base --ftp-user=$remoteName --ftp-password=$remotePasswd;
+   		
+		wait
+
+	fi
+done
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;到这里基本就完成了。&lt;/p&gt;
+
+&lt;h2 id=&quot;注意事项&quot;&gt;注意事项&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;所有操作前务必备份数据（包括整个Working Copy、.svn目录中的wc.db及pristine目录），任何干预svn的操作都是极具风险的！&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;此方案为个人尝试，因使用造成的任何意外损失概不能负责！&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;关于自动化脚本&quot;&gt;关于自动化脚本&lt;/h2&gt;
+
+&lt;p&gt;文中提及的脚本内容，我已经整合成shell脚本文件，放在了我的github上，地址如下:&lt;/p&gt;
+
+&lt;h3 id=&quot;githubreplace-svn-local-doc&quot;&gt;&lt;a href=&quot;https://github.com/Smallfan/Replace-SVN-local-doc&quot;&gt;Github:Replace-SVN-local-doc&lt;/a&gt;&lt;/h3&gt;
+
+&lt;h2 id=&quot;最后&quot;&gt;最后&lt;/h2&gt;
+
+&lt;p&gt;后来和架构师们一起沟通后，有了更完美的解决方案：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用Jenkins持续集成环境配合服务器B进行自动化生成静态库，这样所有的静态库文件就在近场服务器上，速度慢的问题就解决了。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;当然，自己还发现了另一种办法：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;利用在服务器B上搭建SVN镜像服务器来实现高速update&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+</description>
+        <pubDate>Wed, 30 Nov 2016 23:20:48 +0800</pubDate>
+        <link>http://localhost:4000/2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</guid>
+        
+        <category>工匠图谱</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>初探Runtime - isa &amp; Class</title>
+        <description>&lt;p&gt;首先先给出两道设计&lt;strong&gt;Runtime&lt;/strong&gt;题目，后面会给出解答。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;下面代码输出什么?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;@implementation Szrdc : Firstshare
+- (id)init {
+    self = [super init];
+    if (self) {
+        NSLog(@&quot;%@&quot;, NSStringFromClass([self class]));
+        NSLog(@&quot;%@&quot;, NSStringFromClass([super class]));
+    }
+    return self;
+}
+@end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;下面代码输出什么?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;@interface Szrdc : NSObject
+@end
+
+@implementation Szrdc
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        BOOL res1 = [(id)[NSObject class] isKindOfClass:[NSObject class]];
+        BOOL res2 = [(id)[NSObject class] isMemberOfClass:[NSObject class]];
+        BOOL res3 = [(id)[Szrdc class] isKindOfClass:[Szrdc class]];
+        BOOL res4 = [(id)[Szrdc class] isMemberOfClass:[Szrdc class]];
+
+        NSLog(@&quot;%d %d %d %d&quot;, res1, res2, res3, res4);
+    }
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;什么是runtime&quot;&gt;什么是Runtime?&lt;/h2&gt;
+&lt;p&gt;**Runtime **中文称运行时，由iOS/Mac系统底层以C语言函数形式实现的API。&lt;/p&gt;
+
+&lt;p&gt;回顾Objective-C这门语言，有如下几个特性：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;动态类型（Dynamic typing）&lt;/strong&gt;：运行时再决定对象的类型。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;动态绑定（Dynamic binding）&lt;/strong&gt;：运行时才确定实际要调用的对象方法。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;动态加载（Dynamic loading）&lt;/strong&gt;：根据需求加载所需要的资源。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;C语言&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;在C语言等静态语言中，在编译期，根据代码函数的调用就会决定调用哪个函数。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Objective-C&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;而Objective-C 是一种动态语言，编译阶段只是确定了要向接收者（类或实例）发送这条消息，而接受者将要如何响应和处理这条消息，那就要看运行时来决定了。开发者在编码过程中，可以给任意一个对象发送任何消息（只要完成了必要的方法声明，甚至可以是没有具体实现的方法），只有在真正运行时才会根据函数的名称找到对应的函数来调用。&lt;/p&gt;
+
+&lt;p&gt;这意味着Objective-C（下面简称为Objc）不仅需要一个编译器，也需要一个运行时系统来动态得创建类和对象、进行消息传递和转发。&lt;/p&gt;
+
+&lt;p&gt;Objc 在三种层面上与 Runtime 系统进行交互：
+&lt;strong&gt;①Objective-C 源代码&lt;/strong&gt;&lt;br /&gt;
+&lt;strong&gt;②Foundation 框架下 NSObject 类定义的方法&lt;/strong&gt;&lt;br /&gt;
+&lt;strong&gt;③对 Runtime 库函数的直接调用&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/Runtime%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E5%9B%BE.jpg&quot; alt=&quot;Runtime系统层次图&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;通过-objective-c-源代码&quot;&gt;通过 Objective-C 源代码&lt;/h3&gt;
+&lt;p&gt;一般情况下，开发者只需要编写 OC 源代码，Runtime 系统会在编译阶段将所有源码转换成运行时代码，在运行时确定对应的数据结构和具体的方法调用。&lt;/p&gt;
+&lt;h3 id=&quot;通过-foundation-框架下-nsobject-类定义的方法&quot;&gt;通过 Foundation 框架下 NSObject 类定义的方法&lt;/h3&gt;
+&lt;p&gt;如果你探究过NSObject类的头文件就会发现：NSObject没有父类，换言之就是NSObject是Foundation框架里根类（基类），与此相同的基类还有一个NSProxy类。这两个类都定义了类层次结构中该类下方所有类的公共接口和行为。这两个类都遵循了NSObject协议。在NSObject协议中，声明了所有OC对象的公共方法。&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;iOS10.0 NSObject.h 部分代码&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;@protocol NSObject
+@property (readonly) Class superclass;
+- (Class)class OBJC_SWIFT_UNAVAILABLE(&quot;use 'anObject.dynamicType' instead&quot;);
+
+- (id)performSelector:(SEL)aSelector;
+- (id)performSelector:(SEL)aSelector withObject:(id)object;
+- (id)performSelector:(SEL)aSelector withObject:(id)object1 withObject:(id)object2;
+
+- (BOOL)isKindOfClass:(Class)aClass;
+- (BOOL)isMemberOfClass:(Class)aClass;
+- (BOOL)conformsToProtocol:(Protocol *)aProtocol;
+
+- (BOOL)respondsToSelector:(SEL)aSelector;
+
+- (instancetype)retain OBJC_ARC_UNAVAILABLE;
+- (oneway void)release OBJC_ARC_UNAVAILABLE;
+- (instancetype)autorelease OBJC_ARC_UNAVAILABLE;
+- (NSUInteger)retainCount OBJC_ARC_UNAVAILABLE;
+
+- (struct _NSZone *)zone OBJC_ARC_UNAVAILABLE;
+
+@end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;superclass成员变量&lt;/strong&gt; : 对象的父类;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;class方法&lt;/strong&gt; : 返回对象的类；（OC和Swift默认不支持）&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;performSelector: withObject: withObject:方法&lt;/strong&gt; : 运行时向对象发送SEL和参数消息;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;isKindOfClass:方法&lt;/strong&gt; 和 &lt;strong&gt;isMemberOfClass:方法&lt;/strong&gt; : 检查对象是否存在于指定的类的继承体系中（是否是其子类或者父类或者当前类的成员变量）;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;respondsToSelector:方法&lt;/strong&gt; : 检查对象能否响应指定的消息；&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;conformsToProtocol:方法&lt;/strong&gt; : 检查对象是否实现了指定协议类的方法；&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;respondsToSelector:方法&lt;/strong&gt; : 检查对象能否响应特定消息；&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;以下方法为MRC产物，具体原理抽空另起篇幅专门讲讲（给自己挖个坑），本文暂不讨论。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;retain方法&lt;/strong&gt; : 持有对象；（ARC下不支持）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;release方法&lt;/strong&gt; : 释放对象；（ARC下不支持）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;autorelease方法&lt;/strong&gt; : 注册对象到autoreleasepool，根据pool生命周期管理对象；（ARC下不支持）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;retainCount方法&lt;/strong&gt; : 返回对象的引用计数；（ARC下不支持）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;zone方法&lt;/strong&gt; : 返回内存分配区域多重管理区块；（ARC下不支持）（系为防止内存碎片化而引入，具体再另起炉灶撰文讨论）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;在&lt;strong&gt;NSObject类&lt;/strong&gt;还定义了&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;iOS10.0 NSObject.h 部分代码&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;- (IMP)methodForSelector:(SEL)aSelector;
++ (IMP)instanceMethodForSelector:(SEL)aSelector;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;它们用于返回类或实例中指定方法实现的地址IMP。（&lt;a href=&quot;http://www.jianshu.com/p/4a09d5ebdc2c&quot;&gt;什么是IMP？&lt;/a&gt;）&lt;/p&gt;
+
+&lt;h3 id=&quot;通过对-runtime-库函数的直接调用&quot;&gt;通过对 Runtime 库函数的直接调用&lt;/h3&gt;
+&lt;p&gt;前面我们提到过：Objc是一门动态语言，也就是说实际上程序在运行时需要一套运行系统和API实时支持，这套API就是Runtime库函数，由C语言函数实现，具备面向对象能力。
+关于Runtime 函数可以在Apple官方文档&lt;a href=&quot;https://developer.apple.com/reference/objectivec/1657527-objective_c_runtime&quot;&gt;objective-c runtime reference&lt;/a&gt;中详细查看。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;提示&lt;/strong&gt; : Apple越来越不建议开发者手动调用Runtime的API，也同样希望开发者不要知道具体底层实现。所以有时候Xcode会出现编写Runtime函数时没有代码提示，解决方式如下：
+&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/Xcode%E9%85%8D%E7%BD%AE.png&quot; alt=&quot;Xcode配置&quot; /&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;浅度剖析nsobject类&quot;&gt;浅度剖析NSObject类&lt;/h2&gt;
+&lt;p&gt;NSObject的定义如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;typedef struct objc_class *Class;
+
+@interface NSObject  {
+Class isa  OBJC_ISA_AVAILABILITY;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;在Objc2.0之前，&lt;strong&gt;objc_class&lt;/strong&gt;源码如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;struct objc_class {
+    Class isa  OBJC_ISA_AVAILABILITY;
+
+    #if !__OBJC2__
+        Class super_class                                        OBJC2_UNAVAILABLE;
+        const char *name                                         OBJC2_UNAVAILABLE;
+        long version                                             OBJC2_UNAVAILABLE;
+        long info                                                OBJC2_UNAVAILABLE;
+        long instance_size                                       OBJC2_UNAVAILABLE;
+        struct objc_ivar_list *ivars                             OBJC2_UNAVAILABLE;
+        struct objc_method_list **methodLists                    OBJC2_UNAVAILABLE;
+        struct objc_cache *cache                                 OBJC2_UNAVAILABLE;
+        struct objc_protocol_list *protocols                     OBJC2_UNAVAILABLE;
+    #endif
+
+} OBJC2_UNAVAILABLE;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;可以看出在Objc2.0之前，一个类中具有超类指针，类名，版本等信息。
+&lt;strong&gt;ivars&lt;/strong&gt;是objc_ivar_list成员变量列表的指针；&lt;strong&gt;methodLists&lt;/strong&gt;是指向objc_method_list指针的指针。 &lt;em&gt;methodLists是指向方法列表的指针。这里如果动态修改&lt;/em&gt;methodLists的值来添加成员方法，也就是Category实现的原理了，同样解释了Category不能添加属性的原因。
+关于Category，抽空另起篇幅好好说说它。（又挖坑？）&lt;/p&gt;
+
+&lt;p&gt;Objc 2.0之后，&lt;strong&gt;objc_class&lt;/strong&gt;的定义变成如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;typedef struct objc_class *Class;
+typedef struct objc_object *id;
+
+@interface Object { 
+    Class isa; 
+}
+
+@interface NSObject  {
+    Class isa  OBJC_ISA_AVAILABILITY;
+}
+
+struct objc_object {
+    private:
+    isa_t isa;
+}
+
+struct objc_class : objc_object {
+    // Class ISA;
+    Class superclass;
+    cache_t cache;             // formerly cache pointer and vtable
+    class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags
+}
+
+union isa_t 
+{
+    isa_t() { }
+    isa_t(uintptr_t value) : bits(value) { }
+    Class cls;
+    uintptr_t bits;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/objc_class%E7%B1%BB%E5%9B%BE.png&quot; alt=&quot;objc_class类图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Objc对象都是 C 语言结构体实现的，在Objc2.0中，所有的对象都会包含一个isa_t类型的结构体。
+objc_object被源码typedef成了id类型，这也就是我们平时遇到的id类型。这个结构体中就只包含了一个isa_t类型的结构体。这个结构体在下面会详细分析。
+objc_class继承于objc_object。所以在objc_class中也会包含isa_t类型的结构体isa。至此，可以得出结论：Objective-C 中类也是一个对象。在objc_class中，除了isa之外，还有3个成员变量，一个是父类的指针，一个是方法缓存，最后一个这个类的实例方法链表。
+object类和NSObject类里面分别都包含一个objc_class类型的isa。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;先从isa来说起&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;当一个对象的实例方法被调用的时候，会通过isa找到相应的类，然后在该类的class_data_bits_t中去查找方法。class_data_bits_t是指向了类对象的数据区域。在该数据区域内查找相应方法的对应实现。&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;这里有个疑问：但是在我们调用类方法的时候，类对象的isa里面是什么呢？&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;这里为了和对象查找方法的机制一致，遂引入了元类(meta-class)的概念。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;关于元类，更多具体可以研究这篇文章&lt;a href=&quot;http://www.cocoawithlove.com/2010/01/what-is-meta-class-in-objective-c.html&quot;&gt;what is a meta-class in objective-c&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;在引入元类之后，类对象和对象查找方法的机制就完全统一了。&lt;/p&gt;
+
+&lt;p&gt;对象的实例方法调用时，通过对象的 isa 在类中获取方法的实现。
+类对象的类方法调用时，通过类的 isa 在元类中获取方法的实现。&lt;/p&gt;
+
+&lt;p&gt;meta-class之所以重要，是因为它存储着一个类的所有类方法。每个类都会有一个单独的meta-class，因为每个类的类方法基本不可能完全相同。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/%E7%B1%BB%E4%B8%8E%E5%85%83%E7%B1%BB%E5%85%B3%E7%B3%BB%E5%9B%BE.png&quot; alt=&quot;类与元类关系图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;如上图所示：
+&lt;strong&gt;1.&lt;/strong&gt; Root class (class)其实就是NSObject，NSObject是没有超类的，所以Root class(class)的superclass指向nil。
+&lt;strong&gt;2.&lt;/strong&gt; 每个Class都有一个isa指针指向唯一的Meta class
+&lt;strong&gt;3.&lt;/strong&gt; Root class(meta)的superclass指向Root class(class)，也就是NSObject，形成一个回路。
+&lt;strong&gt;4.&lt;/strong&gt; 每个Meta class的isa指针都指向Root class (meta)。&lt;/p&gt;
+
+&lt;p&gt;类对象和元类对象是唯一的，对象是可以在运行时创建无数个的。而在main方法执行之前，从 dyld到runtime这期间，类对象和元类对象在这期间被创建。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;isa_t结构体的具体实现&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;struct objc_object {
+    private:
+        isa_t isa;
+    public:
+        void initIsa(Class cls /*indexed=false*/);
+        void initInstanceIsa(Class cls, bool hasCxxDtor);
+    private:
+        void initIsa(Class newCls, bool indexed, bool hasCxxDtor);
+｝
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;那就从initIsa方法开始研究。下面以arm64为例。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;inline void
+objc_object::initInstanceIsa(Class cls, bool hasCxxDtor)
+{
+initIsa(cls, true, hasCxxDtor);
+}
+
+inline void
+objc_object::initIsa(Class cls, bool indexed, bool hasCxxDtor)
+{
+if (!indexed) {
+isa.cls = cls;
+} else {
+isa.bits = ISA_MAGIC_VALUE;
+isa.has_cxx_dtor = hasCxxDtor;
+isa.shiftcls = (uintptr_t)cls &amp;gt;&amp;gt; 3;
+}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;initIsa第二个参数传入了一个true，所以initIsa就会执行else里面的语句。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;# if __arm64__
+#   define ISA_MASK        0x0000000ffffffff8ULL
+#   define ISA_MAGIC_MASK  0x000003f000000001ULL
+#   define ISA_MAGIC_VALUE 0x000001a000000001ULL
+struct {
+    uintptr_t indexed           : 1;
+    uintptr_t has_assoc         : 1;
+    uintptr_t has_cxx_dtor      : 1;
+    uintptr_t shiftcls          : 33; // MACH_VM_MAX_ADDRESS 0x1000000000
+    uintptr_t magic             : 6;
+    uintptr_t weakly_referenced : 1;
+    uintptr_t deallocating      : 1;
+    uintptr_t has_sidetable_rc  : 1;
+    uintptr_t extra_rc          : 19;
+#       define RC_ONE   (1ULL
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/isa_t%E7%BB%93%E6%9E%84%E5%9B%BE.jpg&quot; alt=&quot;arm64及x86_64 isa_t 内存对照表&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;ISA_MAGIC_VALUE = 0x000001a000000001ULL转换成二进制是11010000000000000000000000000000000000001&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/isa_t%E5%AE%9E%E9%99%85%E8%BF%90%E8%A1%8C%E5%9B%BE.png&quot; alt=&quot;arm64 isa_t实际运行表&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;关于参数的说明：
+&lt;strong&gt;index&lt;/strong&gt;
+代表是否开启isa指针优化。index = 1，代表开启isa指针优化。&lt;/p&gt;
+
+&lt;p&gt;在2013年9月，苹果推出了iPhone5s，与此同时，iPhone5s配备了首个采用64位架构的A7双核处理器，为了节省内存和提高执行效率，苹果提出了Tagged Pointer的概念。对于64位程序，引入Tagged Pointer后，相关逻辑能减少一半的内存占用，以及3倍的访问速度提升，100倍的创建、销毁速度提升。
+在WWDC2013的《Session 404 Advanced in Objective-C》视频中，Apple介绍了 Tagged Pointer。 Tagged Pointer的存在主要是为了节省内存。我们知道，对象的指针大小一般是与机器字长有关，在32位系统中，一个指针的大小是32位（4字节），而在64位系统中，一个指针的大小将是64位（8字节）。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;关于&lt;strong&gt;Tagged Pointer&lt;/strong&gt;，唐巧在&lt;a href=&quot;http://www.infoq.com/cn/articles/deep-understanding-of-tagged-pointer/&quot;&gt;深入理解Tagged Pointer&lt;/a&gt;更深入地探讨了。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;假设我们要存储一个NSNumber对象，其值是一个整数。正常情况下，如果这个整数只是一个NSInteger的普通变量，那么它所占用的内存是与CPU的位数有关，在32位CPU下占4个字节，在64位CPU下是占8个字节的。而指针类型的大小通常也是与CPU位数相关，一个指针所占用的内存在32位CPU下为4个字节，在64位CPU下也是8个字节。如果没有Tagged Pointer对象，从32位机器迁移到64位机器中后，虽然逻辑没有任何变化，但这种NSNumber、NSDate一类的对象所占用的内存会翻倍。如下图所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/%E6%9C%AA%E4%BD%BF%E7%94%A8TaggedPointer.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Apple提出了Tagged Pointer对象。由于NSNumber、NSDate一类的变量本身的值需要占用的内存大小常常不需要8个字节，拿整数来说，4个字节所能表示的有符号整数就可以达到20多亿（注：2^31=2147483648，另外1位作为符号位)，对于绝大多数情况都是可以处理的。所以，引入了Tagged Pointer对象之后，64位CPU下NSNumber的内存图变成了以下这样：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/%E4%BD%BF%E7%94%A8TaggedPointer.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;has_assoc&lt;/strong&gt;
+对象含有或者曾经含有关联引用，没有关联引用的可以更快地释放内存&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;has_cxx_dtor&lt;/strong&gt;
+表示该对象是否有 C++ 或者 Objc 的析构器&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;shiftcls&lt;/strong&gt;
+类的指针。arm64架构中有33位可以存储类指针。&lt;/p&gt;
+
+&lt;p&gt;源码中isa.shiftcls = (uintptr_t)cls » 3;
+将当前地址右移三位的主要原因是用于将 Class 指针中无用的后三位清除减小内存的消耗，因为类的指针要按照字节（8 bits）对齐内存，其指针后三位都是没有意义的 0。具体可以看&lt;a href=&quot;https://github.com/Draveness/iOS-Source-Code-Analyze/blob/master/contents/objc/从%20NSObject%20的初始化了解%20isa.md#shiftcls&quot;&gt;从NSObject 的初始化了解isa&lt;/a&gt;的shiftcls分析。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;magic&lt;/strong&gt;
+判断对象是否初始化完成，在arm64中0x16是调试器判断当前对象是真的对象还是没有初始化的空间。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;weakly_referenced&lt;/strong&gt;
+对象被指向或者曾经指向一个 ARC 的弱变量，没有弱引用的对象可以更快释放。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;deallocating&lt;/strong&gt;
+对象是否正在释放内存。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;has_sidetable_rc&lt;/strong&gt;
+判断该对象的引用计数是否过大，如果过大则需要其他散列表来进行存储。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;extra_rc&lt;/strong&gt;
+存放该对象的引用计数值减一后的结果。对象的引用计数超过 1，会存在这个这个里面，如果引用计数为 10，extra_rc的值就为 9。&lt;/p&gt;
+
+&lt;p&gt;ISA_MAGIC_MASK 和 ISA_MASK 分别是通过掩码的方式获取MAGIC值 和 isa类指针。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;cache_t的具体实现&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;struct cache_t {
+    struct bucket_t *_buckets;
+    mask_t _mask;
+    mask_t _occupied;
+}
+
+typedef unsigned int uint32_t;
+typedef uint32_t mask_t;  // x86_64 &amp;amp; arm64 asm are less efficient with 16-bits
+
+typedef unsigned long  uintptr_t;
+typedef uintptr_t cache_key_t;
+
+struct bucket_t {
+    private:
+        cache_key_t _key;
+        IMP _imp;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/cache_t.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;mask&lt;/strong&gt; ：分配用来缓存bucket的总数。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;occupied&lt;/strong&gt; ：表明目前实际占用的缓存bucket的个数。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;bucket_t&lt;/strong&gt; : 存储了一个unsigned long和一个IMP。IMP是一个函数指针，指向了一个方法的具体实现。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;cache_t&lt;/strong&gt;中的bucket_t *_buckets其实就是一个散列表，用来存储Method的链表。&lt;/p&gt;
+
+&lt;p&gt;Cache的作用主要是为了优化方法调用的性能。当对象receiver调用方法message时，首先根据对象receiver的isa指针查找到它对应的类，然后在类的methodLists中搜索方法，如果没有找到，就使用super_class指针到父类中的methodLists查找，一旦找到就调用方法。如果没有找到，有可能消息转发，也可能忽略它。但这样查找方式效率太低，因为往往一个类大概只有20%的方法经常被调用，占总调用次数的80%。所以使用Cache来缓存经常调用的方法，当调用方法时，优先在Cache查找，如果没有找到，再到methodLists查找。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;class_data_bits_t的具体实现&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;struct class_data_bits_t {
+
+    // Values are the FAST_ flags above.
+    uintptr_t bits;
+}
+
+struct class_rw_t {
+    uint32_t flags;
+    uint32_t version;
+
+    const class_ro_t *ro;
+
+    method_array_t methods;
+    property_array_t properties;
+    protocol_array_t protocols;
+
+    Class firstSubclass;
+    Class nextSiblingClass;
+
+    char *demangledName;
+}
+
+struct class_ro_t {
+    uint32_t flags;
+    uint32_t instanceStart;
+    uint32_t instanceSize;
+    #ifdef __LP64__
+    uint32_t reserved;
+#endif
+
+    const uint8_t * ivarLayout;
+
+    const char * name;
+    method_list_t * baseMethodList;
+    protocol_list_t * baseProtocols;
+    const ivar_list_t * ivars;
+
+    const uint8_t * weakIvarLayout;
+    property_list_t *baseProperties;
+
+    method_list_t *baseMethods() const {
+        return baseMethodList;
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/class_data_bits_t.png&quot; alt=&quot;class_data_bits_t&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在 objc_class结构体中的注释写到 &lt;strong&gt;class_data_bits_t&lt;/strong&gt; 相当于 &lt;strong&gt;class_rw_t&lt;/strong&gt; 指针加上 &lt;strong&gt;rr/alloc&lt;/strong&gt; 的标志。&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;class_data_bits_t bits; // class_rw_t * plus custom rr/alloc flags
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;它为我们提供了便捷方法用于返回其中的 class_rw_t *指针：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;class_rw_t *data() {
+    return bits.data();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Objc的类的属性、方法、以及遵循的协议在obj 2.0的版本之后都放在class_rw_t中。class_ro_t是一个指向常量的指针，存储来编译器决定了的属性、方法和遵守协议。（rw-readwrite，ro-readonly）&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;编译期&lt;/strong&gt;，类的结构中的 class_data_bits_t *data指向的是一个 class_ro_t *指针：
+&lt;img src=&quot;http://odxtco6l9.bkt.clouddn.com/image/chutanruntime/class_data_bits_t2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在运行时调用 realizeClass方法，会做以下3件事情：
+&lt;strong&gt;1.&lt;/strong&gt;从 class_data_bits_t调用 data方法，将结果从 class_rw_t强制转换为 class_ro_t指针
+&lt;strong&gt;2.&lt;/strong&gt;初始化一个 class_rw_t结构体
+&lt;strong&gt;3.&lt;/strong&gt;设置结构体 ro的值以及 flag&lt;/p&gt;
+
+&lt;p&gt;最后调用methodizeClass方法，把类里面的属性，协议，方法都加载进来。&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;struct method_t {
+    SEL name;
+    const char *types;
+    IMP imp;
+
+struct SortBySELAddress :
+    public std::binary_function
+    {
+        bool operator() (const method_t&amp;amp; lhs,
+        const method_t&amp;amp; rhs)
+    { return lhs.name 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;方法method的定义如上。里面包含3个成员变量。SEL是方法的名字name。types是&lt;a href=&quot;https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html&quot;&gt;Type Encoding&lt;/a&gt;类型编码。
+IMP是一个函数指针，指向的是函数的具体实现。在runtime中消息传递和转发的目的就是为了找到IMP，并执行函数。&lt;/p&gt;
+
+&lt;h2 id=&quot;题目解析&quot;&gt;题目解析&lt;/h2&gt;
+
+&lt;p&gt;截止到这里，前面两道题我们可以来试着分析。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;题目一：下面代码输出什么?&lt;/p&gt;
+  &lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;@implementation Szrdc : Firstshare
+- (id)init {
+    self = [super init];
+    if (self) {
+        NSLog(@&quot;%@&quot;, NSStringFromClass([self class]));
+        NSLog(@&quot;%@&quot;, NSStringFromClass([super class]));
+    }
+    return self;
+}
+@end
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;分析&lt;/strong&gt;
+&lt;strong&gt;self&lt;/strong&gt;是类的一个隐藏参数，每个方法的实现的第一个参数即为self。
+&lt;strong&gt;super&lt;/strong&gt;并不是隐藏参数，它实际上只是一个”编译器标示符”，它负责告诉编译器，当调用方法时，去调用父类的方法，而不是本类中的方法。&lt;/p&gt;
+
+&lt;p&gt;在调用[super class]的时候，runtime会去调用objc_msgSendSuper方法，而不是objc_msgSend。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;OBJC_EXPORT void objc_msgSendSuper(void /* struct objc_super *super, SEL op, ... */ )
+
+
+/// Specifies the superclass of an instance. 
+struct objc_super {
+/// Specifies an instance of a class.
+__unsafe_unretained id receiver;
+
+/// Specifies the particular superclass of the instance to message. 
+#if !defined(__cplusplus)  &amp;amp;&amp;amp;  !__OBJC2__
+/* For compatibility with old objc-runtime.h header */
+__unsafe_unretained Class class;
+#else
+__unsafe_unretained Class super_class;
+#endif
+/* super_class is the first class to search */
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在objc_msgSendSuper方法中，第一个参数是一个objc_super的结构体，这个结构体里面有两个变量，一个是接收消息的receiver，一个是当前类的父类super_class。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;objc_msgSendSuper&lt;/strong&gt;的工作原理:
+从objc_super结构体指向的superClass父类的方法列表开始查找selector，找到后以objc-&amp;gt;receiver去调用这个selector。注意，最后的调用者是objc-&amp;gt;receiver，而不是super_class！&lt;/p&gt;
+
+&lt;p&gt;那么objc_msgSendSuper最后就转变成：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;objc_msgSend(objc_super-&amp;gt;receiver, @selector(class))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;答案&lt;/strong&gt;
+&lt;strong&gt;objc_super-&amp;gt;receiver = self。所以最后输出两个都一样，都是输出son。&lt;/strong&gt;
+&lt;br /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;题目二：下面代码输出什么?&lt;/p&gt;
+  &lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;@interface Szrdc : NSObject
+@end
+@implementation Szrdc
+@end
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        BOOL res1 = [(id)[NSObject class] isKindOfClass:[NSObject class]];
+        BOOL res2 = [(id)[NSObject class] isMemberOfClass:[NSObject class]];
+        BOOL res3 = [(id)[Szrdc class] isKindOfClass:[Szrdc class]];
+        BOOL res4 = [(id)[Szrdc class] isMemberOfClass:[Szrdc class]];
+        NSLog(@&quot;%d %d %d %d&quot;, res1, res2, res3, res4);
+    }
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;分析&lt;/strong&gt;
+以下是NSObject协议几个方法的具体实现（OpenSource）：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-objc&quot;&gt;+ (Class)class {
+    return self;
+}
+
+- (Class)class {
+    return object_getClass(self);
+}
+
+Class object_getClass(id obj)
+{
+    if (obj) return obj-&amp;gt;getIsa();
+    else return Nil;
+}
+
+inline Class 
+objc_object::getIsa() 
+{
+    if (isTaggedPointer()) {
+        uintptr_t slot = ((uintptr_t)this &amp;gt;&amp;gt; TAG_SLOT_SHIFT) &amp;amp; TAG_SLOT_MASK;
+        return objc_tag_classes[slot];
+    }
+    return ISA();
+}
+
+inline Class 
+objc_object::ISA() 
+{
+    assert(!isTaggedPointer()); 
+    return (Class)(isa.bits &amp;amp; ISA_MASK);
+}
+
++ (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = object_getClass((id)self); tcls; tcls = tcls-&amp;gt;superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+
+- (BOOL)isKindOfClass:(Class)cls {
+    for (Class tcls = [self class]; tcls; tcls = tcls-&amp;gt;superclass) {
+        if (tcls == cls) return YES;
+    }
+    return NO;
+}
+
++ (BOOL)isMemberOfClass:(Class)cls {
+    return object_getClass((id)self) == cls;
+}
+
+- (BOOL)isMemberOfClass:(Class)cls {
+    return [self class] == cls;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;isKindOfClass:方法内部，会先去获得object_getClass的类，而object_getClass的源码实现是去调用当前类的obj-&amp;gt;getIsa()，最后在ISA()方法中获得meta class的指针。&lt;/p&gt;
+
+&lt;p&gt;接着在isKindOfClass中有一个循环，先判断class是否等于meta class，不等就继续循环判断是否等于super class，不等再继续取super class，如此循环下去。&lt;/p&gt;
+
+&lt;p&gt;[NSObject class]执行完之后调用isKindOfClass，第一次判断先判断NSObject 和 NSObject的meta class是否相等，之前讲到meta class的时候放了一张很详细的图，从图上我们也可以看出，NSObject的meta class与本身不等。接着第二次循环判断NSObject与meta class的superclass是否相等。还是从那张图上面我们可以看到：Root class(meta) 的superclass 就是 Root class(class)，也就是NSObject本身。所以第二次循环相等，于是第一行res1输出应该为YES。&lt;/p&gt;
+
+&lt;p&gt;同理，[Szrdc class]执行完之后调用isKindOfClass，第一次for循环，Szrdc的Meta Class与[Szrdc class]不等，第二次for循环，Szrdc Meta Class的super class 指向的是 NSObject Meta Class， 和 Szrdc Class不相等。第三次for循环，NSObject Meta Class的super class指向的是NSObject Class，和 Szrdc Class 不相等。第四次循环，NSObject Class 的super class 指向 nil， 和 Szrdc Class不相等。第四次循环之后，退出循环，所以第三行的res3输出为NO。&lt;/p&gt;
+
+&lt;p&gt;如果把这里的Szrdc改成它的实例对象，[szrdc isKindOfClass:[Szrdc class]，那么此时就应该输出YES了。因为在isKindOfClass函数中，判断szrdc的meta class是自己的元类Szrdc，第一次for循环就能输出YES了。&lt;/p&gt;
+
+&lt;p&gt;isMemberOfClass的源码实现是拿到自己的isa指针和自己比较，是否相等。
+第二行isa 指向 NSObject 的 Meta Class，所以和 NSObject Class不相等。第四行，isa指向Szrdc的Meta Class，和Szrdc Class也不等，所以第二行res2和第四行res4都输出NO。
+&lt;strong&gt;答案&lt;/strong&gt;
+&lt;strong&gt;1 0 0 0&lt;/strong&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+</description>
+        <pubDate>Fri, 07 Oct 2016 15:56:48 +0800</pubDate>
+        <link>http://localhost:4000/2016/10/%E5%88%9D%E6%8E%A2Runtime/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/10/%E5%88%9D%E6%8E%A2Runtime/</guid>
+        
+        <category>牛顿启示录</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>
