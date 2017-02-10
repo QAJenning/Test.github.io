@@ -22,7 +22,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-    - {title: 关于, description: About me, url: 'http://ford.smallfan.net/about'}
+    - {title: 关于, description: About me, url: 'http://aboutFord.smallfan.net/'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
