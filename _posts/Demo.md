@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Hello World
-data: 2017-02-12 23:19:01
+date: 2017-02-12 23:19:01
 tags:
 - MyCode
 ---
