@@ -1,9 +1,9 @@
 # Basic
-title: Ford
-subtitle: 天籁之音，人生几得。
+title: Jenning
+subtitle: 亲近自然，亲近所有美好。
 welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank">Download the theme</a>
-description: 嗨！我叫肖帆（@Ford），一名普通的iOS开发者。生活在碧海蓝天下的深圳。以技术和音乐为乐，乐于分享所见所得，请多多指教。
-creator: <a href="http://smallfan.net">@Ford</a>
+description: 嗨！我叫展宁（@Jenning），一名软件测试工程师。
+creator: <a href="http://QAJenning.github.io">@Jenning</a>
 
 url: "/"
 
@@ -13,7 +13,7 @@ permalink: /:year/:month/:title/
 highlighter: plain
 
 # supported colors: blue, green, purple, red, orange or slate. If you need clear, leave it empty.
-cover_color: blue
+cover_color: red
 
 # The blog button should not be removed.
 blog_button:
@@ -38,10 +38,10 @@ comment:
 # Social
 social:
     # weibo: CoderSmallfan
-    github: CoderSmallfan
+    github: QAJenning
     #twitter: CoderSmallfan
     #gplus: 107108267983477358170
-    mail: CoderSmallfan@qq.com
+    mail: QAJenning@qq.com
 
 # Google Analytics
 ga:
