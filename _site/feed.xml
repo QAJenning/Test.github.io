@@ -5,9 +5,20 @@
     <description>嗨！我叫展宁（@Jenning），一名软件测试工程师。</description>
     <link>//</link>
     <atom:link href="//feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 12 Feb 2017 23:24:00 +0800</pubDate>
-    <lastBuildDate>Sun, 12 Feb 2017 23:24:00 +0800</lastBuildDate>
+    <pubDate>Sun, 12 Feb 2017 23:33:29 +0800</pubDate>
+    <lastBuildDate>Sun, 12 Feb 2017 23:33:29 +0800</lastBuildDate>
     <generator>Jekyll v3.4.0</generator>
+    
+      <item>
+        <title>Hello World</title>
+        <description>&lt;h3 id=&quot;hello&quot;&gt;Hello!&lt;/h3&gt;
+</description>
+        <pubDate>Sat, 11 Feb 2017 07:10:01 +0800</pubDate>
+        <link>//2017/02/Hi/</link>
+        <guid isPermaLink="true">//2017/02/Hi/</guid>
+        
+        
+      </item>
     
   </channel>
 </rss>
