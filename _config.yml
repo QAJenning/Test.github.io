@@ -5,7 +5,7 @@ welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank"
 description: 嗨！我叫肖帆（@Ford），一名普通的iOS开发者。生活在碧海蓝天下的深圳。以技术和音乐为乐，乐于分享所见所得，请多多指教。
 creator: <a href="http://smallfan.net">@Ford</a>
 
-url: "http://ford.smallfan.net"
+url: "http://smallfan.net"
 
 permalink: /:year/:month/:title/
 
