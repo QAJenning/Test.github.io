@@ -3,10 +3,10 @@
   <channel>
     <title>Ford</title>
     <description>嗨！我叫肖帆（@Ford），一名普通的iOS开发者。生活在碧海蓝天下的深圳。以技术和音乐为乐，乐于分享所见所得，请多多指教。</description>
-    <link>http://localhost:4000/</link>
-    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 12 Feb 2017 17:51:17 +0800</pubDate>
-    <lastBuildDate>Sun, 12 Feb 2017 17:51:17 +0800</lastBuildDate>
+    <link>//</link>
+    <atom:link href="//feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 12 Feb 2017 18:07:37 +0800</pubDate>
+    <lastBuildDate>Sun, 12 Feb 2017 18:07:37 +0800</lastBuildDate>
     <generator>Jekyll v3.4.0</generator>
     
       <item>
@@ -91,8 +91,8 @@ num的值为：1091567616
 &lt;hr /&gt;
 </description>
         <pubDate>Tue, 27 Dec 2016 17:39:22 +0800</pubDate>
-        <link>http://localhost:4000/2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</link>
-        <guid isPermaLink="true">http://localhost:4000/2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</guid>
+        <link>//2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</link>
+        <guid isPermaLink="true">//2016/12/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/</guid>
         
         <category>工匠图谱</category>
         
@@ -452,8 +452,8 @@ done
 &lt;hr /&gt;
 </description>
         <pubDate>Wed, 30 Nov 2016 23:20:48 +0800</pubDate>
-        <link>http://localhost:4000/2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</link>
-        <guid isPermaLink="true">http://localhost:4000/2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</guid>
+        <link>//2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</link>
+        <guid isPermaLink="true">//2016/11/SVN%E7%9B%AE%E5%BD%95%E9%9D%9E%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E6%97%A0%E6%84%9F%E7%9F%A5%E6%9B%BF%E6%8D%A2%E6%96%B9%E6%A1%88/</guid>
         
         <category>工匠图谱</category>
         
@@ -1074,8 +1074,8 @@ objc_object::ISA()
 &lt;hr /&gt;
 </description>
         <pubDate>Fri, 07 Oct 2016 15:56:48 +0800</pubDate>
-        <link>http://localhost:4000/2016/10/%E5%88%9D%E6%8E%A2Runtime/</link>
-        <guid isPermaLink="true">http://localhost:4000/2016/10/%E5%88%9D%E6%8E%A2Runtime/</guid>
+        <link>//2016/10/%E5%88%9D%E6%8E%A2Runtime/</link>
+        <guid isPermaLink="true">//2016/10/%E5%88%9D%E6%8E%A2Runtime/</guid>
         
         <category>牛顿启示录</category>
         
